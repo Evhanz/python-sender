@@ -12,7 +12,7 @@ load_dotenv()
 api_url = os.getenv('api_url')
 ssh_key_path = os.getenv('ssh_key_path')
 
-def transfer_and_notify(ssh_host, ssh_port, ssh_user, path_folder, numberPartFile, version, path_CS):
+def transfer_and_notify(ssh_host, ssh_port, ssh_user, path_folder, numberPartFile, version, path_CS, id_shipping):
 
     local_file_path     = path_folder+ '/'  + version + '/'+ numberPartFile
     newRemoteFilePath   = path_CS + '/'  + version +  '/'+numberPartFile
@@ -41,7 +41,7 @@ def transfer_and_notify(ssh_host, ssh_port, ssh_user, path_folder, numberPartFil
         print(result)
 
     # Send message to API
-    api_data = {'message': f'Transfer of {local_file_path} to {ssh_host} completed successfully', 'result': result, 'success': success, 'number_file': numberPartFile}
+    api_data = {'message': f'Transfer of {local_file_path} to {ssh_host} completed successfully', 'result': result, 'success': success, 'number_file': numberPartFile, 'id_shipping': id_shipping}
     api_headers = {'Authorization': f'Bearer 939608268'}
     try:
         response = requests.post(api_url, data=api_data, headers=api_headers)
@@ -74,7 +74,7 @@ def main(args):
 
     for numberPartFile in args.file_paths:
         try:
-            transfer_and_notify(args.ssh_host, args.ssh_port, args.ssh_user, args.path_folder, numberPartFile, args.version, args.path_CS)
+            transfer_and_notify(args.ssh_host, args.ssh_port, args.ssh_user, args.path_folder, numberPartFile, args.version, args.path_CS, args.id_shipping)
         except Exception as e:
             print(f"Error transferring file: {e}")
 
@@ -88,6 +88,7 @@ if __name__ == '__main__':
     parser.add_argument('--file_paths', type=str, nargs='+', required=True, help='List of paths to local for concat files')
     parser.add_argument('--version', type=str, required=True, help='Version to APK')
     parser.add_argument('--path_CS', type=str, default='/sdcard', help='Folder to save APK')
+    parser.add_argument('--id_shipping', type=int, required=True, help='Id shipping')
     args = parser.parse_args()
 
     main(args)
